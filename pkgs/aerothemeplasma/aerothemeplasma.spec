@@ -6,7 +6,7 @@
 
 Name:           aerothemeplasma
 Version:        0
-Release:        0.7.%{commitdate}git%{shortcommit}%{?dist}
+Release:        0.8.%{commitdate}git%{shortcommit}%{?dist}
 Summary:        Windows 7-inspired KDE Plasma desktop theme
 
 License:        AGPLv3
@@ -75,6 +75,7 @@ BuildRequires:  plasma-wayland-protocols-devel
 BuildRequires:  libepoxy-devel
 BuildRequires:  libdrm-devel
 BuildRequires:  polkit-qt6-1-devel 
+BuildRequires:  curl
 
 # Specific extras for the theme
 Requires:       kvantum
@@ -142,6 +143,23 @@ pushd build-kcmloader
 make %{?_smp_mflags}
 popd
 
+#Build libplasma
+VERSION="6.5.4"
+URL="https://invent.kde.org/plasma/libplasma/-/archive/v${VERSION}/libplasma-v${VERSION}.tar.gz"
+ARCHIVE="libplasma-v${VERSION}.tar.gz"
+SRCDIR="libplasma-v${VERSION}"
+mkdir build-libplasma
+curl $URL -o ./build-libplasma/$ARCHIVE
+tar -xvf ./build-libplasma/$ARCHIVE -C ./build-libplasma/
+cp -r misc/libplasma/src ./build-libplasma/$SRCDIR/
+mkdir -p ./build-libplasma/$SRCDIR/build
+pushd ./build-libplasma/$SRCDIR/build
+%cmake -DCMAKE_INSTALL_PREFIX=/usr .. -B .
+cmake --build . --target corebindingsplugin
+mkdir ../../build
+cp -r * ../../build
+popd
+
 %install
 # Clear buildroot
 rm -rf %{buildroot}
@@ -178,6 +196,14 @@ done
 #Install kcmloader
 pushd build-kcmloader
 %make_install
+popd
+
+#Install libplasma patches
+pushd ./build-libplasma/build
+cp ./bin/org/kde/plasma/core/libcorebindingsplugin.so %{_libdir}/qt6/qml/org/kde/plasma/core/libcorebindingsplugin.so
+for filename in "./bin/libPlasma"*; do
+	cp "$filename" %{_libdir}
+done
 popd
 
 # Install SMOD window decoration resource file
@@ -363,6 +389,8 @@ kbuildsycoca6 &> /dev/null || :
 %{_datadir}/mime/packages/*
 %{_datadir}/smod/*
 %{_bindir}/aerothemeplasma-kcmloader
+%{_libdir}/qt6/qml/org/kde/plasma/core/libcorebindingsplugin.so
+%{_libdir}/libPlasma"*
 
 # KDE decoration plugins
 %{_libdir}/qt6/plugins/org.kde.kdecoration3/org.smod.smod.so
