@@ -1,8 +1,8 @@
 %global debug_package %{nil}
 
-%global commit 5680d72d7cfe642fcefbe55681e7955b22e1a63e
+%global commit 31aa748bcd641c062d09ec72988646f5127dc357
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global commitdate 20251226
+%global commitdate 20251230
 
 Name:           aerothemeplasma
 Version:        0
