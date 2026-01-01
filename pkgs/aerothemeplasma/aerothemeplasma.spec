@@ -154,8 +154,10 @@ tar -xvf ./build-libplasma/$ARCHIVE -C ./build-libplasma/
 cp -r misc/libplasma/src ./build-libplasma/$SRCDIR/
 mkdir -p ./build-libplasma/$SRCDIR/build
 pushd ./build-libplasma/$SRCDIR/build
-%cmake -DCMAKE_INSTALL_PREFIX=/usr .. -B .
-cmake --build . --target corebindingsplugin
+%cmake .. \
+      -G "Unix Makefiles"  \
+      -DCMAKE_BUILD_TYPE=Release -B .
+make %{?_smp_mflags}
 mkdir ../../build
 cp -r * ../../build
 popd
@@ -200,10 +202,28 @@ popd
 
 #Install libplasma patches
 pushd ./build-libplasma/build
-cp ./bin/org/kde/plasma/core/libcorebindingsplugin.so %{_libdir}/qt6/qml/org/kde/plasma/core/libcorebindingsplugin.so
-for filename in "./bin/libPlasma"*; do
-	cp "$filename" %{_libdir}
-done
+%make_install
+# since make installs all parts of libplasma, remove any unneeded files that this is not patching
+rm -r %{buildroot}%{_includedir}/Plasma
+rm -r %{buildroot}%{_includedir}/PlasmaQuick
+rm -r %{buildroot}%{_libdir}/cmake
+rm -r %{buildroot}%{_libdir}/qt6/plugins/kf6
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/kirigami
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/components
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/configuration
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/DefaultToolTip.qml
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/DialogBackground.qml
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/corebindingsplugin.qmltypes
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/kde-qmlmodule.version
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/qmldir
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/extras
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/plasmoid
+rm -r %{buildroot}%{_datadir}/kdevappwizard
+rm -r %{buildroot}%{_datadir}/locale/*/LC_MESSAGES/libplasma6.mo
+rm -r %{buildroot}%{_datadir}/plasma/desktoptheme/breeze-dark
+rm -r %{buildroot}%{_datadir}/plasma/desktoptheme/breeze-light
+rm -r %{buildroot}%{_datadir}/plasma/desktoptheme/default
+rm -r %{buildroot}%{_datadir}/qlogging-categories6
 popd
 
 # Install SMOD window decoration resource file
@@ -390,7 +410,7 @@ kbuildsycoca6 &> /dev/null || :
 %{_datadir}/smod/*
 %{_bindir}/aerothemeplasma-kcmloader
 %{_libdir}/qt6/qml/org/kde/plasma/core/libcorebindingsplugin.so
-%{_libdir}/libPlasma"*
+%{_libdir}/libPlasma*
 
 # KDE decoration plugins
 %{_libdir}/qt6/plugins/org.kde.kdecoration3/org.smod.smod.so
