@@ -144,7 +144,7 @@ make %{?_smp_mflags}
 popd
 
 #Build libplasma
-VERSION="6.5.4"
+VERSION=$(rpm -q plasma-workspace-devel --queryformat '%%{VERSION}')
 URL="https://invent.kde.org/plasma/libplasma/-/archive/v${VERSION}/libplasma-v${VERSION}.tar.gz"
 ARCHIVE="libplasma-v${VERSION}.tar.gz"
 SRCDIR="libplasma-v${VERSION}"
