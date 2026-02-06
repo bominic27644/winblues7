@@ -1,12 +1,12 @@
 %global debug_package %{nil}
 
-%global commit 5680d72d7cfe642fcefbe55681e7955b22e1a63e
+%global commit d572194634735a6a727dc71cc4cf1aaf3ca8ce7a
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global commitdate 20251226
+%global commitdate 20260204
 
 Name:           aerothemeplasma
 Version:        0
-Release:        0.7.%{commitdate}git%{shortcommit}%{?dist}
+Release:        0.9.%{commitdate}git%{shortcommit}%{?dist}
 Summary:        Windows 7-inspired KDE Plasma desktop theme
 
 License:        AGPLv3
@@ -75,6 +75,7 @@ BuildRequires:  plasma-wayland-protocols-devel
 BuildRequires:  libepoxy-devel
 BuildRequires:  libdrm-devel
 BuildRequires:  polkit-qt6-1-devel 
+BuildRequires:  curl
 
 # Specific extras for the theme
 Requires:       kvantum
@@ -142,6 +143,25 @@ pushd build-kcmloader
 make %{?_smp_mflags}
 popd
 
+#Build libplasma
+VERSION=$(rpm -q plasma-workspace-devel --queryformat '%%{VERSION}')
+URL="https://invent.kde.org/plasma/libplasma/-/archive/v${VERSION}/libplasma-v${VERSION}.tar.gz"
+ARCHIVE="libplasma-v${VERSION}.tar.gz"
+SRCDIR="libplasma-v${VERSION}"
+mkdir build-libplasma
+curl $URL -o ./build-libplasma/$ARCHIVE
+tar -xvf ./build-libplasma/$ARCHIVE -C ./build-libplasma/
+cp -r misc/libplasma/src ./build-libplasma/$SRCDIR/
+mkdir -p ./build-libplasma/$SRCDIR/build
+pushd ./build-libplasma/$SRCDIR/build
+%cmake .. \
+      -G "Unix Makefiles"  \
+      -DCMAKE_BUILD_TYPE=Release -B .
+make %{?_smp_mflags}
+mkdir ../../build
+cp -r * ../../build
+popd
+
 %install
 # Clear buildroot
 rm -rf %{buildroot}
@@ -178,6 +198,32 @@ done
 #Install kcmloader
 pushd build-kcmloader
 %make_install
+popd
+
+#Install libplasma patches
+pushd ./build-libplasma/build
+%make_install
+# since make installs all parts of libplasma, remove any unneeded files that this is not patching
+rm -r %{buildroot}%{_includedir}/Plasma
+rm -r %{buildroot}%{_includedir}/PlasmaQuick
+rm -r %{buildroot}%{_libdir}/cmake
+rm -r %{buildroot}%{_libdir}/qt6/plugins/kf6
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/kirigami
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/components
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/configuration
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/DefaultToolTip.qml
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/DialogBackground.qml
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/corebindingsplugin.qmltypes
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/kde-qmlmodule.version
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/core/qmldir
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/extras
+rm -r %{buildroot}%{_libdir}/qt6/qml/org/kde/plasma/plasmoid
+rm -r %{buildroot}%{_datadir}/kdevappwizard
+rm -r %{buildroot}%{_datadir}/locale/*/LC_MESSAGES/libplasma6.mo
+rm -r %{buildroot}%{_datadir}/plasma/desktoptheme/breeze-dark
+rm -r %{buildroot}%{_datadir}/plasma/desktoptheme/breeze-light
+rm -r %{buildroot}%{_datadir}/plasma/desktoptheme/default
+rm -r %{buildroot}%{_datadir}/qlogging-categories6
 popd
 
 # Install SMOD window decoration resource file
@@ -363,6 +409,8 @@ kbuildsycoca6 &> /dev/null || :
 %{_datadir}/mime/packages/*
 %{_datadir}/smod/*
 %{_bindir}/aerothemeplasma-kcmloader
+%{_libdir}/qt6/qml/org/kde/plasma/core/libcorebindingsplugin.so
+%{_libdir}/libPlasma*
 
 # KDE decoration plugins
 %{_libdir}/qt6/plugins/org.kde.kdecoration3/org.smod.smod.so
