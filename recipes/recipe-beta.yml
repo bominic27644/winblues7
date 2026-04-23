@@ -14,7 +14,7 @@ modules:
         - plymouth-plugin-script
 
   - type: copy
-    from: ghcr.io/winblues/atp-common
+    from: ghcr.io/bominic27644/atp-common
     src: /system_files
     dest: /
 
