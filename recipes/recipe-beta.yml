@@ -21,6 +21,8 @@ modules:
   - type: script
     snippets:
       - "rm /usr/share/wayland-sessions/plasma.desktop"
+      - "kbuildsycoca6"
+      - "update-mime-database /usr/share/mime"
     scripts:
       - 00-image-info.sh
       - 11-fonts.sh
