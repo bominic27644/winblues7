@@ -3,8 +3,8 @@ name: winblues7
 description: Winblues 7
 alt-tags: ["beta"]
 
-base-image: ghcr.io/ublue-os/bazzite-dx
-image-version: latest
+base-image: ghcr.io/ublue-os/bazzite
+image-version: stable
 
 modules:
   - type: dnf
@@ -21,6 +21,8 @@ modules:
   - type: script
     snippets:
       - "rm /usr/share/wayland-sessions/plasma.desktop"
+      - "kbuildsycoca6"
+      - "update-mime-database /usr/share/mime"
     scripts:
       - 00-image-info.sh
       - 11-fonts.sh
