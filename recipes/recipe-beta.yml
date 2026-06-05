@@ -3,7 +3,7 @@ name: winblues7
 description: Winblues 7
 alt-tags: ["beta"]
 
-base-image: ghcr.io/ublue-os/bazzite
+base-image: ghcr.io/ublue-os/bazzite-dx
 image-version: stable
 
 modules:
