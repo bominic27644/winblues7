@@ -3,8 +3,8 @@ name: winblues7-nvidia
 description: Winblues 7
 alt-tags: ["beta"]
 
-base-image: ghcr.io/ublue-os/bazzite-dx-nvidia
-image-version: latest
+base-image: ghcr.io/ublue-os/bazzite-nvidia-open
+image-version: stable
 
 modules:
   - type: dnf

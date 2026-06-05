@@ -3,8 +3,8 @@ name: winblues7
 description: Winblues 7
 alt-tags: ["beta"]
 
-base-image: ghcr.io/ublue-os/bazzite-dx
-image-version: latest
+base-image: ghcr.io/ublue-os/bazzite
+image-version: stable
 
 modules:
   - type: dnf
